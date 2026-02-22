@@ -11,6 +11,7 @@ from langchain_core.messages import (
     SystemMessage,
     ToolMessage,
 )
+from langchain_core.runnables.config import var_child_runnable_config
 from pydantic import BaseModel
 from typing_extensions import TypedDict
 
@@ -367,3 +368,15 @@ def test_push_messages_in_graph():
             messages.append(message)
 
     assert values["messages"] == messages
+
+
+def test_push_message_no_callbacks():
+    token = var_child_runnable_config.set(
+        {"callbacks": None, "metadata": {}, "configurable": {}}
+    )
+    try:
+        msg = push_message(AIMessage(content="Hello", id="1"), state_key=None)
+    finally:
+        var_child_runnable_config.reset(token)
+
+    assert msg == AIMessage(content="Hello", id="1")

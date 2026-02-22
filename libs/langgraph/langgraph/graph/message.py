@@ -348,13 +348,15 @@ def push_message(
     if message.id is None:
         raise ValueError("Message ID is required")
 
-    if isinstance(config["callbacks"], BaseCallbackManager):
-        manager = config["callbacks"]
-        handlers = manager.handlers
-    elif isinstance(config["callbacks"], list) and all(
-        isinstance(x, BaseCallbackHandler) for x in config["callbacks"]
+    callbacks = config.get("callbacks")
+    handlers: list[BaseCallbackHandler] = []
+
+    if isinstance(callbacks, BaseCallbackManager):
+        handlers = callbacks.handlers
+    elif isinstance(callbacks, list) and all(
+        isinstance(x, BaseCallbackHandler) for x in callbacks
     ):
-        handlers = config["callbacks"]
+        handlers = callbacks
 
     if stream_handler := next(
         (x for x in handlers if isinstance(x, StreamMessagesHandler)), None
